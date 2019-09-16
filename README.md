@@ -15,3 +15,23 @@ The data is sent to the [Google Firebase](https://https://firebase.google.com/) 
  iOS     : [Contact me](mailto:catalin.bora@gmail.com) ,because Apple testing is more complicated. 
 
  Android : [App Download Link](https://install.appcenter.ms/orgs/reactive-boards/apps/rbtracker-1/distribution_groups/rbstats%20android%20testers)
+
+## Builds Commands
+
+### Android
+To generate an APK signed with development certificates run:
+```
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+cd android 
+./gradlew clean
+./gradlew assembleDebug
+rm app/src/main/assets/index.android.bundle
+cd ..
+```
+The resulting APK is found in ./android/app/build/outputs/apk/**debug**
+
+To test that all was ok you should test install the resulting apk on an emulator.
+Remove old APK from emulator first and run:
+```
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
