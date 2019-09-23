@@ -201,8 +201,8 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
     implementation "com.google.android.gms:play-services-base:17.1.0"
-    implementation "com.google.firebase:firebase-core:17.1.0"
-    implementation "com.google.firebase:firebase-firestore:17.1.0"
+    implementation "com.google.firebase:firebase-core:17.2.0"
+    implementation "com.google.firebase:firebase-firestore:21.1.1"
 
     if (enableHermes) {
       def hermesPath = "../../node_modules/hermesvm/android/";
