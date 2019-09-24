@@ -15,6 +15,7 @@ import com.facebook.soloader.SoLoader;
 
 import java.util.List;
 
+import io.invertase.firebase.fabric.crashlytics.RNFirebaseCrashlyticsPackage;
 import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
 
 public class MainApplication extends Application implements ReactApplication {
@@ -32,6 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here, for example:
       // packages.add(new MyReactNativePackage());
       packages.add(new RNFirebaseFirestorePackage());
+      packages.add(new RNFirebaseCrashlyticsPackage());
       return packages;
     }
 
