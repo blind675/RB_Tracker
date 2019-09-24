@@ -30,6 +30,8 @@ PODS:
     - Fabric (~> 1.10.2)
   - DoubleConversion (1.1.6)
   - Fabric (1.10.2)
+  - Firebase/Analytics (6.3.0):
+    - Firebase/Core
   - Firebase/Core (6.3.0):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 6.0.2)
@@ -227,7 +229,10 @@ DEPENDENCIES:
   - appcenter (from `../node_modules/appcenter`)
   - appcenter-analytics (from `../node_modules/appcenter-analytics`)
   - appcenter-crashes (from `../node_modules/appcenter-crashes`)
+  - Crashlytics (~> 3.14.0)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - Fabric (~> 1.10.2)
+  - Firebase/Analytics
   - Firebase/Core (~> 6.3.0)
   - Firebase/Firestore (~> 6.3.0)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
@@ -262,6 +267,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - AppCenter
+    - AppCenterReactNativeShared
     - BoringSSL-GRPC
     - Crashlytics
     - Firebase
@@ -277,8 +284,6 @@ SPEC REPOS:
     - nanopb
     - Protobuf
   trunk:
-    - AppCenter
-    - AppCenterReactNativeShared
     - boost-for-react-native
     - Fabric
     - Firebase
@@ -410,6 +415,6 @@ SPEC CHECKSUMS:
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   yoga: 312528f5bbbba37b4dcea5ef00e8b4033fdd9411
 
-PODFILE CHECKSUM: 1e218787771131335c21c6b41067832112babcb0
+PODFILE CHECKSUM: 812f0a26913ce4ef183db9e3263839b293d0ee9e
 
 COCOAPODS: 1.8.0.beta.1
