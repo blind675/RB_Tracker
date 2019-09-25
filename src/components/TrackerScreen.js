@@ -114,7 +114,7 @@ class TrackerScreen extends Component<Props> {
 				<View style={styles.row}>
 					<Text> Total rides: </Text>
 					<Text style={styles.valuesLabels}>
-						{' '}{this.props.rides}{' '}
+						{this.props.rides}
 					</Text>
 				</View>
 				<View style={styles.flexOne} />
@@ -223,11 +223,13 @@ const styles = StyleSheet.create({
 	valuesLabels: {
 		fontSize: 17,
 		marginVertical: 4,
+		marginRight: 2,
 	},
 	accentValuesLabels: {
 		fontSize: 17,
-		marginVertical: 4,
 		fontWeight: '700',
+		marginVertical: 4,
+		marginRight: 2,
 	},
 });
 

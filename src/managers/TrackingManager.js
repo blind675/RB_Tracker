@@ -51,36 +51,34 @@ class TrackingManager {
 			// 	BackgroundGeolocation.endTask(taskKey);
 			// });
 
-			// TODO: set accuracy limit if it's on for android
+			// only send locations with accuracy less then 20
+			if (location.longitude && location.latitude && location.accuracy < 21) {
+				const geoPoint: GeoPoint = {
+					longitude: location.longitude,
+					latitude: location.latitude,
+					altitude: location.altitude,
+					accuracy: location.accuracy,
+					accelerometerData: this.instance._accelerometerData,
+					uniqueId: DeviceInfo.getUniqueID(),
+					manufacturer: DeviceInfo.getManufacturer(),
+				};
 
-			// only send locations with accuracy less then 31
-			// if (location.longitude && location.latitude && location.accuracy < 31) {
-			const geoPoint: GeoPoint = {
-				longitude: location.longitude,
-				latitude: location.latitude,
-				altitude: location.altitude,
-				accuracy: location.accuracy,
-				accelerometerData: this.instance._accelerometerData,
-				uniqueId: DeviceInfo.getUniqueID(),
-				manufacturer: DeviceInfo.getManufacturer(),
-			};
+				// send data to firebase.. no need to call redux
+				firebase.firestore().collection('geo_points').add(geoPoint);
 
-			// send data to firebase.. no need to call redux
-			firebase.firestore().collection('geo_points').add(geoPoint);
+				this.instance._accelerometerData = [];
 
-			this.instance._accelerometerData = [];
+				if (this.instance._lastGeoPoint) {
+					//calculate distance of 2 points
+					const durationInSeconds = Math.floor((Date.now() - this.instance._lastTimestamp) / 1000);
+					const distance = this.instance._distanceToPointInM(geoPoint, this.instance._lastGeoPoint);
 
-			if (this.instance._lastGeoPoint) {
-				//calculate distance of 2 points
-				const durationInSeconds = Math.floor((Date.now() - this.instance._lastTimestamp) / 1000);
-				const distance = this.instance._distanceToPointInM(geoPoint, this.instance._lastGeoPoint);
+					updateStats(distance, durationInSeconds);
+				}
 
-				updateStats(distance, durationInSeconds);
+				this.instance._lastGeoPoint = geoPoint;
+				this.instance._lastTimestamp = Date.now();
 			}
-
-			this.instance._lastGeoPoint = geoPoint;
-			this.instance._lastTimestamp = Date.now();
-			// }
 		});
 
 		return this.instance;

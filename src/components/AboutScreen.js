@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 type Props = {};
 
@@ -7,7 +8,11 @@ class AboutScreen extends Component<Props> {
 	render() {
 		return (
 			<View style={styles.screenContainer}>
-				<Text style={styles.textStyle}>This app is a simple tracking app for ©Reactive Boards. For more details please visit www.reactive-boards.com</Text>
+				<Text style={styles.textStyle}>
+					This app is a simple tracking app for ©Reactive Boards. For more details please visit
+					www.reactive-boards.com
+				</Text>
+				<Text style={styles.textStyle}>Build version: {DeviceInfo.getVersion()}</Text>
 			</View>
 		);
 	}
