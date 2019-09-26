@@ -1,30 +1,46 @@
-import { TIMERS_UPDATE_SUCCESS, STATES_UPDATE_SUCCESS, RIDES_UPDATE_SUCCESS } from './types';
+import {
+	TIMERS_UPDATE_SUCCESS,
+	STATES_UPDATE_SUCCESS,
+	RIDES_UPDATE_SUCCESS,
+	STATES_RIDE_START,
+	STATES_RIDE_END,
+} from './types';
+import store from '../Store';
+
+export const stopRide = () => {
+    store.dispatch({
+		type: STATES_RIDE_END,
+	});
+};
 
 export const startNewRide = () => {
 	return (dispatch, getState) => {
-        const { timers, stats, rides } = getState();
+		const { timers, rides } = getState();
 
-        dispatch({
+		dispatch({
+			type: STATES_RIDE_START,
+		});
+
+		dispatch({
 			type: TIMERS_UPDATE_SUCCESS,
 			payload: {
-                ...timers,
-                timeForRide: 0,
-            },
+				...timers,
+				timeForRide: 0,
+			},
 		});
 
-        dispatch({
+		dispatch({
 			type: STATES_UPDATE_SUCCESS,
 			payload: {
-                ...stats,
-                avgSpeed: 0,
-                recordCount: 0,
-                currentDistance: 0,
-            },
+				avgSpeed: 0,
+				recordCount: 0,
+				currentDistance: 0,
+			},
 		});
 
-        dispatch({
+		dispatch({
 			type: RIDES_UPDATE_SUCCESS,
 			payload: rides + 1,
 		});
-    };
+	};
 };

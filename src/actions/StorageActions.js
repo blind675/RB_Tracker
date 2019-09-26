@@ -74,6 +74,7 @@ export const saveData = () => {
 export const clearData = () => {
 	return dispatch => {
 		const emptyStats = {
+			active: false,
 			avgSpeed: 0,
 			recordCount: 0,
 			currentDistance: 0,

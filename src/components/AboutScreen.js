@@ -13,6 +13,7 @@ class AboutScreen extends Component<Props> {
 					www.reactive-boards.com
 				</Text>
 				<Text style={styles.textStyle}>Build version: {DeviceInfo.getVersion()}</Text>
+				<Text style={styles.textStyle}>Current time: {Date.now()} ( for test )</Text>
 			</View>
 		);
 	}

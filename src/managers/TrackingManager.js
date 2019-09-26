@@ -4,6 +4,8 @@ import DeviceInfo from 'react-native-device-info';
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 
 import { updateStats } from '../actions/StatsActions';
+import { stopRide } from '../actions/RidesActions';
+import { saveData } from '../actions/StorageActions';
 
 export type GeoPoint = {
 	longitude: number,
@@ -26,7 +28,7 @@ class TrackingManager {
 
 			BackgroundGeolocation.configure({
 				desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
-				stationaryRadius: 50,
+				stationaryRadius: 100,
 				distanceFilter: 50,
 				notificationsEnabled: false,
 				debug: false,
@@ -53,31 +55,30 @@ class TrackingManager {
 
 			// only send locations with accuracy less then 20
 			if (location.longitude && location.latitude && location.accuracy < 21) {
-				const geoPoint: GeoPoint = {
-					longitude: location.longitude,
-					latitude: location.latitude,
-					altitude: location.altitude,
-					accuracy: location.accuracy,
-					accelerometerData: this.instance._accelerometerData,
-					uniqueId: DeviceInfo.getUniqueID(),
-					manufacturer: DeviceInfo.getManufacturer(),
-				};
-
-				// send data to firebase.. no need to call redux
-				firebase.firestore().collection('geo_points').add(geoPoint);
-
-				this.instance._accelerometerData = [];
-
 				if (this.instance._lastGeoPoint) {
-					//calculate distance of 2 points
+					// don't send points in the same location
+
+					// calculate distance of 2 points
 					const durationInSeconds = Math.floor((Date.now() - this.instance._lastTimestamp) / 1000);
-					const distance = this.instance._distanceToPointInM(geoPoint, this.instance._lastGeoPoint);
+					const distance = this.instance._distanceToPointInM(location, this.instance._lastGeoPoint);
 
-					updateStats(distance, durationInSeconds);
+					if (distance < this.instance._lastGeoPoint.accuracy + location.accuracy) {
+						// user is in the accuracy error zone
+						// didn't move since last location reading
+						console.log('- time stay here: ', durationInSeconds);
+						// auto shut down if user in same location more than 5 min
+						if (durationInSeconds > 300) {
+							this.instance.stopTracking();
+						}
+					} else {
+						// user moved
+						updateStats(distance, durationInSeconds);
+
+						this.instance._sendLocationToServer(location);
+					}
+				} else {
+					this.instance._sendLocationToServer(location);
 				}
-
-				this.instance._lastGeoPoint = geoPoint;
-				this.instance._lastTimestamp = Date.now();
 			}
 		});
 
@@ -93,10 +94,32 @@ class TrackingManager {
 		this._lastGeoPoint = null;
 		this._lastTimestamp = null;
 
+		this.instance = this;
+
 		return this;
 	}
 
-	addAccelerometer = accelerometerObject => {
+	_sendLocationToServer = location => {
+		const geoPoint: GeoPoint = {
+			longitude: location.longitude,
+			latitude: location.latitude,
+			altitude: location.altitude,
+			accuracy: location.accuracy,
+			accelerometerData: this.instance._accelerometerData,
+			uniqueId: DeviceInfo.getUniqueID(),
+			manufacturer: DeviceInfo.getManufacturer(),
+		};
+
+		// send data to firebase.. no need to call redux
+		firebase.firestore().collection('geo_points').add(geoPoint);
+
+		// cleanup
+		this.instance._accelerometerData = [];
+		this.instance._lastGeoPoint = geoPoint;
+		this.instance._lastTimestamp = Date.now();
+	};
+
+	_addAccelerometer = accelerometerObject => {
 		if (this._accelerometerData.length < 100) {
 			this._accelerometerData.push(accelerometerObject);
 		} else {
@@ -123,13 +146,17 @@ class TrackingManager {
 				z: data.z,
 			};
 
-			this.addAccelerometer(accelerometerObject);
+			this._addAccelerometer(accelerometerObject);
 		});
 
 		BackgroundGeolocation.start();
 	};
 
 	stopTracking = () => {
+		stopRide();
+
+		saveData();
+
 		if (this._accelerometerObserver) {
 			this._accelerometerObserver.unsubscribe();
 		}
@@ -141,6 +168,8 @@ class TrackingManager {
 		this._lastTimestamp = null;
 		this._lastGeoPoint = null;
 		this._accelerometerData = [];
+
+		// TODO: set a local notification in 90 min to remind user to view website
 	};
 
 	_distanceToPointInM = (firstGeoPoint, secondGeoPoint) => {

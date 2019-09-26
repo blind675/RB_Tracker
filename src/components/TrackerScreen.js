@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, AppState } from 'react-native';
 import Permissions from 'react-native-permissions';
 import FlipToggle from 'react-native-flip-toggle-button';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,7 +14,7 @@ class TrackerScreen extends Component<Props> {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isActive: false,
+			appState: AppState.currentState,
 		};
 		this.timer = null;
 	}
@@ -27,7 +27,22 @@ class TrackerScreen extends Component<Props> {
 			}
 		});
 		this.props.loadData();
+
+		AppState.addEventListener('change', this._handleAppStateChange);
 	}
+
+	componentWillUnmount() {
+		AppState.removeEventListener('change', this._handleAppStateChange);
+	}
+
+	_handleAppStateChange = nextAppState => {
+		if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+			if (!this.props.stats.active) {
+				clearInterval(this.timer);
+			}
+		}
+		this.setState({ appState: nextAppState });
+	};
 
 	// Request permission to access location
 	_requestPermission = () => {
@@ -69,8 +84,8 @@ class TrackerScreen extends Component<Props> {
 				<View style={styles.flexOne} />
 				<View style={styles.statusRow}>
 					<Text> Status: </Text>
-					<Text style={this.state.isActive ? styles.trackingStatus : styles.notTrackingStatus}>
-						{this.state.isActive ? 'Tracking' : 'Stopped'}
+					<Text style={this.props.stats.active ? styles.trackingStatus : styles.notTrackingStatus}>
+						{this.props.stats.active ? 'Tracking' : 'Stopped'}
 					</Text>
 				</View>
 				<View style={styles.flexOne} />
@@ -121,7 +136,7 @@ class TrackerScreen extends Component<Props> {
 				<View style={styles.row}>
 					<View style={styles.sliderBorder}>
 						<FlipToggle
-							value={this.state.isActive}
+							value={this.props.stats.active}
 							buttonWidth={270}
 							buttonHeight={50}
 							buttonRadius={0}
@@ -136,22 +151,17 @@ class TrackerScreen extends Component<Props> {
 							buttonOffColor={'#FFFFFF'}
 							labelStyle={styles.sliderLabel}
 							onToggle={newState => {
-								if (!this.state.isActive) {
+								if (!this.props.stats.active) {
 									TrackingManager.getInstance().startTracking();
 									this.timer = setInterval(() => {
 										this.props.updateTimers();
 									}, 1000);
 									this.props.startNewRide();
-									this.setState({
-										isActive: true,
-									});
 								} else {
 									TrackingManager.getInstance().stopTracking();
+									// TODO: this will be a bug.. move this elsewhere.
 									clearInterval(this.timer);
 									this.props.saveData();
-									this.setState({
-										isActive: false,
-									});
 								}
 							}}
 						/>
@@ -161,9 +171,6 @@ class TrackerScreen extends Component<Props> {
 						onPress={() => {
 							TrackingManager.getInstance().stopTracking();
 							clearInterval(this.timer);
-							this.setState({
-								isActive: false,
-							});
 							this.props.clearData();
 						}}
 					>
