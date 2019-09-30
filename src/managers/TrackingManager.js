@@ -1,3 +1,4 @@
+// @flow
 import { accelerometer } from 'react-native-sensors';
 import firebase from 'react-native-firebase';
 import DeviceInfo from 'react-native-device-info';
@@ -54,7 +55,7 @@ class TrackingManager {
 			// });
 
 			// only send locations with accuracy less then 20
-			if (location.longitude && location.latitude && location.accuracy < 21) {
+			if (location.longitude && location.latitude && location.accuracy < 15) {
 				if (this.instance._lastGeoPoint) {
 					// don't send points in the same location
 
