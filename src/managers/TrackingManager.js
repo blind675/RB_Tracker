@@ -69,6 +69,7 @@ class TrackingManager {
 					// calculate distance of 2 points
 					const durationInSeconds = Math.floor((location.time - this.instance._lastTimestamp) / 1000);
 					const distance = this.instance._distanceToPointInM(location, this.instance._lastGeoPoint);
+					const speed = ( Math.floor((distance / durationInSeconds) * 3.6 * 10) / 10 );
 
 					// don't send points in the same location
 					if (distance < this.instance._lastGeoPoint.accuracy + location.accuracy) {
@@ -79,16 +80,16 @@ class TrackingManager {
 							this.instance.stopTracking();
 						}
 					} else {
-						// console.log(' - speed (mk/h): ', ( Math.floor((distance / durationInSeconds) * 3.6 * 10) / 10 ) );
+						// console.log(' - speed (mk/h): ',  speed);
 						// user moved
 						updateStats(distance, durationInSeconds);
 
 						this.instance._lastTimestamp = location.time;
-						this.instance._sendLocationToServer(location);
+						this.instance._sendLocationToServer(location, speed);
 					}
 				} else {
 					this.instance._lastTimestamp = location.time;
-					this.instance._sendLocationToServer(location);
+					this.instance._sendLocationToServer(location, -1);
 				}
 			}
 		});
@@ -110,7 +111,9 @@ class TrackingManager {
 		return this;
 	}
 
-	_sendLocationToServer = location => {
+	_sendLocationToServer = (location, speed) => {
+		const time = new Date(location.time);
+
 		const geoPoint: GeoPoint = {
 			longitude: location.longitude,
 			latitude: location.latitude,
@@ -119,6 +122,8 @@ class TrackingManager {
 			accelerometerData: this.instance._accelerometerData,
 			uniqueId: DeviceInfo.getUniqueID(),
 			manufacturer: DeviceInfo.getManufacturer(),
+			speed: speed,
+			time: time.toUTCString(),
 		};
 
 		// send data to firebase.. no need to call redux
