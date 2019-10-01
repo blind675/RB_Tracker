@@ -37,10 +37,23 @@ class TrackerScreen extends Component<Props> {
 
 	_handleAppStateChange = nextAppState => {
 		if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+			console.log(' - return from background');
 			if (!this.props.stats.active) {
 				clearInterval(this.timer);
+			} else {
+				this.props.updateTimersFromTimeStamp();
+				this.timer = setInterval(() => {
+					this.props.updateTimers();
+				}, 1000);
 			}
 		}
+
+		if (this.state.appState.match(/inactive|background/) && nextAppState === 'background') {
+			console.log(' - enter background');
+			this.props.saveTimeStamp();
+			clearInterval(this.timer);
+		}
+
 		this.setState({ appState: nextAppState });
 	};
 

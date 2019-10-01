@@ -7,6 +7,9 @@ export const updateTimers = () => {
 		const newTimersState = {
 			timeForRide: oldTimers.timeForRide + 1,
 			totalTime: oldTimers.totalTime + 1,
+			flagTimeStamp: oldTimers.flagTimeStamp,
+			flagTotalTime: oldTimers.flagTotalTime,
+			flagTimeForRide: oldTimers.flagTimeForRide,
 		};
 
 		dispatch({
@@ -15,3 +18,44 @@ export const updateTimers = () => {
 		});
 	};
 };
+
+export const saveTimeStamp = () => {
+	return (dispatch, getState) => {
+		const oldTimers = getState().timers;
+
+		const newTimersState = {
+			timeForRide: oldTimers.timeForRide,
+			totalTime: oldTimers.totalTime,
+			flagTimeStamp: Date.now(),
+			flagTotalTime: oldTimers.totalTime,
+			flagTimeForRide: oldTimers.timeForRide,
+		};
+
+		dispatch({
+			type: TIMERS_UPDATE_SUCCESS,
+			payload: newTimersState,
+		});
+	};
+};
+
+export const updateTimersFromTimeStamp = () => {
+
+return (dispatch, getState) => {
+		const oldTimers = getState().timers;
+		const secondsPassed = Math.floor((Date.now() - oldTimers.flagTimeStamp) / 1000);
+
+		const newTimersState = {
+			timeForRide: oldTimers.flagTimeForRide + secondsPassed,
+			totalTime: oldTimers.flagTotalTime + secondsPassed,
+			flagTimeStamp: 0,
+			flagTotalTime: 0,
+			flagTimeForRide: 0,
+		};
+
+		dispatch({
+			type: TIMERS_UPDATE_SUCCESS,
+			payload: newTimersState,
+		});
+	};
+};
+

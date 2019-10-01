@@ -54,30 +54,40 @@ class TrackingManager {
 			// 	BackgroundGeolocation.endTask(taskKey);
 			// });
 
-			// only send locations with accuracy less then 20
+			// console.log(' - new location: ', location);
+			// console.log(' - old location: ', this.instance._lastGeoPoint);
+			// console.log(' --------------- ');
+			// console.log(' - new time    : ', location.time);
+			// console.log(' - old time    : ', this.instance._lastTimestamp);
+			// console.log(' - duration    : ', Math.floor((location.time - this.instance._lastTimestamp) / 1000));
+			// console.log(' --------------- ');
+			// console.log(' - distance    : ', this.instance._lastGeoPoint ? this.instance._distanceToPointInM(location, this.instance._lastGeoPoint) : '-');
+
+			// only send locations with accuracy less then 15
 			if (location.longitude && location.latitude && location.accuracy < 15) {
 				if (this.instance._lastGeoPoint) {
-					// don't send points in the same location
-
 					// calculate distance of 2 points
-					const durationInSeconds = Math.floor((Date.now() - this.instance._lastTimestamp) / 1000);
+					const durationInSeconds = Math.floor((location.time - this.instance._lastTimestamp) / 1000);
 					const distance = this.instance._distanceToPointInM(location, this.instance._lastGeoPoint);
 
+					// don't send points in the same location
 					if (distance < this.instance._lastGeoPoint.accuracy + location.accuracy) {
 						// user is in the accuracy error zone
 						// didn't move since last location reading
-						console.log('- time stay here: ', durationInSeconds);
 						// auto shut down if user in same location more than 5 min
 						if (durationInSeconds > 300) {
 							this.instance.stopTracking();
 						}
 					} else {
+						// console.log(' - speed (mk/h): ', ( Math.floor((distance / durationInSeconds) * 3.6 * 10) / 10 ) );
 						// user moved
 						updateStats(distance, durationInSeconds);
 
+						this.instance._lastTimestamp = location.time;
 						this.instance._sendLocationToServer(location);
 					}
 				} else {
+					this.instance._lastTimestamp = location.time;
 					this.instance._sendLocationToServer(location);
 				}
 			}
@@ -117,7 +127,6 @@ class TrackingManager {
 		// cleanup
 		this.instance._accelerometerData = [];
 		this.instance._lastGeoPoint = geoPoint;
-		this.instance._lastTimestamp = Date.now();
 	};
 
 	_addAccelerometer = accelerometerObject => {
@@ -135,20 +144,18 @@ class TrackingManager {
 	//TODO: if user si stationary show a local notification telling him to stop his app
 	// https://github.com/wumke/react-native-local-notifications
 	startTracking = () => {
-		//start timestamp
-		this._lastTimestamp = Date.now();
 
 		// setUpdateIntervalForType(SensorTypes.accelerometer, 400);
-		this._accelerometerObserver = accelerometer.subscribe(data => {
-			// create new accelerometer object
-			const accelerometerObject = {
-				x: data.x,
-				y: data.y,
-				z: data.z,
-			};
+		// this._accelerometerObserver = accelerometer.subscribe(data => {
+		// 	// create new accelerometer object
+		// 	const accelerometerObject = {
+		// 		x: data.x,
+		// 		y: data.y,
+		// 		z: data.z,
+		// 	};
 
-			this._addAccelerometer(accelerometerObject);
-		});
+		// 	this._addAccelerometer(accelerometerObject);
+		// });
 
 		BackgroundGeolocation.start();
 	};
