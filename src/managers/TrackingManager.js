@@ -146,16 +146,16 @@ class TrackingManager {
 	startTracking = () => {
 
 		// setUpdateIntervalForType(SensorTypes.accelerometer, 400);
-		// this._accelerometerObserver = accelerometer.subscribe(data => {
-		// 	// create new accelerometer object
-		// 	const accelerometerObject = {
-		// 		x: data.x,
-		// 		y: data.y,
-		// 		z: data.z,
-		// 	};
+		this._accelerometerObserver = accelerometer.subscribe(data => {
+			// create new accelerometer object
+			const accelerometerObject = {
+				x: data.x,
+				y: data.y,
+				z: data.z,
+			};
 
-		// 	this._addAccelerometer(accelerometerObject);
-		// });
+			this._addAccelerometer(accelerometerObject);
+		});
 
 		BackgroundGeolocation.start();
 	};
