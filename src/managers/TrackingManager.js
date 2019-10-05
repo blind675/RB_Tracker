@@ -64,7 +64,7 @@ class TrackingManager {
 			// console.log(' - distance    : ', this.instance._lastGeoPoint ? this.instance._distanceToPointInM(location, this.instance._lastGeoPoint) : '-');
 
 			// only send locations with accuracy less then 15
-			if (location.longitude && location.latitude && location.accuracy < 15) {
+			if ( location.longitude && location.latitude && location.accuracy < 15 ) {
 				if (this.instance._lastGeoPoint) {
 					// calculate distance of 2 points
 					const durationInSeconds = Math.floor((location.time - this.instance._lastTimestamp) / 1000);
@@ -106,6 +106,9 @@ class TrackingManager {
 		this._lastGeoPoint = null;
 		this._lastTimestamp = null;
 
+		this._lastDBEntryReference = null;
+		this._backgroundTimeValue = null;
+
 		this.instance = this;
 
 		return this;
@@ -124,10 +127,11 @@ class TrackingManager {
 			manufacturer: DeviceInfo.getManufacturer(),
 			speed: speed,
 			time: time.toUTCString(),
+			backgroundTimeValue: this.instance._backgroundTimeValue ? this.instance._backgroundTimeValue : 0,
 		};
 
 		// send data to firebase.. no need to call redux
-		firebase.firestore().collection('geo_points').add(geoPoint);
+		this.instance._lastDBEntryReference = firebase.firestore().collection('geo_points').add(geoPoint);
 
 		// cleanup
 		this.instance._accelerometerData = [];
@@ -177,10 +181,16 @@ class TrackingManager {
 		BackgroundGeolocation.stop();
 		BackgroundGeolocation.removeAllListeners();
 
+		// clear last entry
+		if( this.instance._lastDBEntryReference ) {
+			firebase.firestore().collection('geo_points').update( this.instance._lastDBEntryReference );
+		}
+
 		//clear timestamp
 		this._lastTimestamp = null;
 		this._lastGeoPoint = null;
 		this._accelerometerData = [];
+
 
 		// TODO: set a local notification in 90 min to remind user to view website
 	};

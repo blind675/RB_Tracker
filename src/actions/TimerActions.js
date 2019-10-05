@@ -1,3 +1,4 @@
+import TrackingManager from '../managers/TrackingManager';
 import { TIMERS_UPDATE_SUCCESS } from './types';
 
 export const updateTimers = () => {
@@ -22,11 +23,14 @@ export const updateTimers = () => {
 export const saveTimeStamp = () => {
 	return (dispatch, getState) => {
 		const oldTimers = getState().timers;
+		const timeNow = Date.now();
+
+		TrackingManager.getInstance()._backgroundTimeValue = timeNow;
 
 		const newTimersState = {
 			timeForRide: oldTimers.timeForRide,
 			totalTime: oldTimers.totalTime,
-			flagTimeStamp: Date.now(),
+			flagTimeStamp: timeNow,
 			flagTotalTime: oldTimers.totalTime,
 			flagTimeForRide: oldTimers.timeForRide,
 		};
