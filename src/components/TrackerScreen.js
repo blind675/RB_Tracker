@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, AppState } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, AppState, Alert } from 'react-native';
 import Permissions from 'react-native-permissions';
 import FlipToggle from 'react-native-flip-toggle-button';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { connect } from 'react-redux';
+import firebase from 'react-native-firebase';
+import DeviceInfo from 'react-native-device-info';
 
 import * as actions from '../actions';
 import TrackingManager from '../managers/TrackingManager';
@@ -29,6 +31,41 @@ class TrackerScreen extends Component<Props> {
 		this.props.loadData();
 
 		AppState.addEventListener('change', this._handleAppStateChange);
+
+		firebase
+			.firestore()
+			.collection('app_versions')
+			.doc(DeviceInfo.getVersion())
+			.get()
+			.then(doc => {
+				if (doc.exists) {
+					const tracking = doc.data().tracking;
+					if (tracking) {
+						TrackingManager.getInstance()._serverTrackingApproved = tracking;
+					} else {
+						Alert.alert(
+							'Server Tracking Not Supported',
+							"This version of your app doesn't send your data to the server. If you want to enable this please send an email to catalin.bora@gmail.com. You can however still track your time and speed.",
+							[
+								{ text: 'OK', onPress: () => {} },
+							],
+							{ cancelable: false }
+						);
+					}
+				} else {
+					Alert.alert(
+						'Server Tracking Not Supported',
+						"This version of your app doesn't send your data to the server. If you want to enable this please send an email to catalin.bora@gmail.com. You can however still track your time and speed.",
+						[
+							{ text: 'OK', onPress: () => {} },
+						],
+						{ cancelable: false }
+					);
+				}
+			})
+			.catch(error => {
+				console.log('Error getting document:', error);
+			});
 	}
 
 	componentWillUnmount() {

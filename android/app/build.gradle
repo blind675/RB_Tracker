@@ -131,8 +131,8 @@ android {
         applicationId "com.rb_tracker"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 100007
-        versionName "1.0.7"
+        versionCode 100100
+        versionName "1.1.0"
         multiDexEnabled true  // needed for firestore:
     }
     splits {

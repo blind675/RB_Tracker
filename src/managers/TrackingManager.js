@@ -64,12 +64,12 @@ class TrackingManager {
 			// console.log(' - distance    : ', this.instance._lastGeoPoint ? this.instance._distanceToPointInM(location, this.instance._lastGeoPoint) : '-');
 
 			// only send locations with accuracy less then 15
-			if ( location.longitude && location.latitude && location.accuracy < 15 ) {
+			if (location.longitude && location.latitude && location.accuracy < 15) {
 				if (this.instance._lastGeoPoint) {
 					// calculate distance of 2 points
 					const durationInSeconds = Math.floor((location.time - this.instance._lastTimestamp) / 1000);
 					const distance = this.instance._distanceToPointInM(location, this.instance._lastGeoPoint);
-					const speed = ( Math.floor((distance / durationInSeconds) * 3.6 * 10) / 10 );
+					const speed = Math.floor(distance / durationInSeconds * 3.6 * 10) / 10;
 
 					// don't send points in the same location
 					if (distance < this.instance._lastGeoPoint.accuracy + location.accuracy) {
@@ -109,6 +109,8 @@ class TrackingManager {
 		this._lastDBEntryReference = null;
 		this._backgroundTimeValue = null;
 
+		this._serverTrackingApproved = false;
+
 		this.instance = this;
 
 		return this;
@@ -130,8 +132,10 @@ class TrackingManager {
 			backgroundTimeValue: this.instance._backgroundTimeValue ? this.instance._backgroundTimeValue : 0,
 		};
 
-		// send data to firebase.. no need to call redux
-		this.instance._lastDBEntryReference = firebase.firestore().collection('geo_points').add(geoPoint);
+		if (this.instance._serverTrackingApproved) {
+			// send data to firebase.. no need to call redux
+			this.instance._lastDBEntryReference = firebase.firestore().collection('geo_points').add(geoPoint);
+		}
 
 		// cleanup
 		this.instance._accelerometerData = [];
@@ -153,7 +157,6 @@ class TrackingManager {
 	//TODO: if user si stationary show a local notification telling him to stop his app
 	// https://github.com/wumke/react-native-local-notifications
 	startTracking = () => {
-
 		// setUpdateIntervalForType(SensorTypes.accelerometer, 400);
 		this._accelerometerObserver = accelerometer.subscribe(data => {
 			// create new accelerometer object
@@ -182,15 +185,16 @@ class TrackingManager {
 		BackgroundGeolocation.removeAllListeners();
 
 		// clear last entry
-		if( this.instance._lastDBEntryReference ) {
-			firebase.firestore().collection('geo_points').update( this.instance._lastDBEntryReference );
+		if (this.instance._lastDBEntryReference) {
+			firebase.firestore().collection('geo_points').update(this.instance._lastDBEntryReference);
 		}
+
+		this.instance._lastDBEntryReference = null;
 
 		//clear timestamp
 		this._lastTimestamp = null;
 		this._lastGeoPoint = null;
 		this._accelerometerData = [];
-
 
 		// TODO: set a local notification in 90 min to remind user to view website
 	};
