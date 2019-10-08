@@ -134,7 +134,10 @@ class TrackingManager {
 
 		if (this.instance._serverTrackingApproved) {
 			// send data to firebase.. no need to call redux
-			this.instance._lastDBEntryReference = firebase.firestore().collection('geo_points').add(geoPoint);
+			firebase.firestore().collection('geo_points').add(geoPoint).then(docRef => {
+				this.instance._lastDBEntryReference = docRef.id;
+				console.log('  --- DELETE : Document with ID: ', this.instance._lastDBEntryReference);
+			});
 		}
 
 		// cleanup
@@ -158,16 +161,16 @@ class TrackingManager {
 	// https://github.com/wumke/react-native-local-notifications
 	startTracking = () => {
 		// setUpdateIntervalForType(SensorTypes.accelerometer, 400);
-		this._accelerometerObserver = accelerometer.subscribe(data => {
-			// create new accelerometer object
-			const accelerometerObject = {
-				x: data.x,
-				y: data.y,
-				z: data.z,
-			};
+		// this._accelerometerObserver = accelerometer.subscribe(data => {
+		// 	// create new accelerometer object
+		// 	const accelerometerObject = {
+		// 		x: data.x,
+		// 		y: data.y,
+		// 		z: data.z,
+		// 	};
 
-			this._addAccelerometer(accelerometerObject);
-		});
+		// 	this._addAccelerometer(accelerometerObject);
+		// });
 
 		BackgroundGeolocation.start();
 	};
@@ -186,7 +189,8 @@ class TrackingManager {
 
 		// clear last entry
 		if (this.instance._lastDBEntryReference) {
-			firebase.firestore().collection('geo_points').update(this.instance._lastDBEntryReference);
+			firebase.firestore().collection('geo_points').doc(this.instance._lastDBEntryReference).delete();
+			console.log('  --- DELETE : Document with ID: ', this.instance._lastDBEntryReference);
 		}
 
 		this.instance._lastDBEntryReference = null;
