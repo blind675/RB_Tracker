@@ -73,8 +73,12 @@ class TrackerScreen extends Component<Props> {
 	}
 
 	_handleAppStateChange = nextAppState => {
+		// console.log(' - app state change');
+		// console.log(' -  appState:', this.state.appState);
+		// console.log(' -  nextAppState:', nextAppState);
+
 		if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-			console.log(' - return from background');
+			console.log(' -- return from background');
 			if (!this.props.stats.active) {
 				clearInterval(this.timer);
 			} else {
@@ -85,8 +89,8 @@ class TrackerScreen extends Component<Props> {
 			}
 		}
 
-		if (this.state.appState.match(/inactive|background/) && nextAppState === 'background') {
-			console.log(' - enter background');
+		if (this.state.appState.match(/inactive|active/) && nextAppState === 'background') {
+			console.log(' -- enter background');
 			this.props.saveTimeStamp();
 			clearInterval(this.timer);
 		}
