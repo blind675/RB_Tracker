@@ -54,14 +54,19 @@ class TrackingManager {
 			// 	BackgroundGeolocation.endTask(taskKey);
 			// });
 
-			// console.log(' - new location: ', location);
-			// console.log(' - old location: ', this.instance._lastGeoPoint);
-			// console.log(' --------------- ');
-			// console.log(' - new time    : ', location.time);
-			// console.log(' - old time    : ', this.instance._lastTimestamp);
-			// console.log(' - duration    : ', Math.floor((location.time - this.instance._lastTimestamp) / 1000));
-			// console.log(' --------------- ');
-			// console.log(' - distance    : ', this.instance._lastGeoPoint ? this.instance._distanceToPointInM(location, this.instance._lastGeoPoint) : '-');
+			console.log(' - new location: ', location);
+			console.log(' - old location: ', this.instance._lastGeoPoint);
+			console.log(' --------------- ');
+			console.log(' - new time    : ', location.time);
+			console.log(' - old time    : ', this.instance._lastTimestamp);
+			console.log(' - duration    : ', Math.floor((location.time - this.instance._lastTimestamp) / 1000));
+			console.log(' --------------- ');
+			console.log(
+				' - distance    : ',
+				this.instance._lastGeoPoint
+					? this.instance._distanceToPointInM(location, this.instance._lastGeoPoint)
+					: '-'
+			);
 
 			// only send locations with accuracy less then 15
 			if (location.longitude && location.latitude && location.accuracy < 15) {
@@ -89,7 +94,13 @@ class TrackingManager {
 					}
 				} else {
 					this.instance._lastTimestamp = location.time;
-					this.instance._sendLocationToServer(location, -1);
+
+					const geoPoint: GeoPoint = {
+						longitude: location.longitude,
+						latitude: location.latitude,
+					};
+
+					this.instance._lastGeoPoint = geoPoint;
 				}
 			}
 		});
@@ -161,16 +172,16 @@ class TrackingManager {
 	// https://github.com/wumke/react-native-local-notifications
 	startTracking = () => {
 		// setUpdateIntervalForType(SensorTypes.accelerometer, 400);
-		// this._accelerometerObserver = accelerometer.subscribe(data => {
-		// 	// create new accelerometer object
-		// 	const accelerometerObject = {
-		// 		x: data.x,
-		// 		y: data.y,
-		// 		z: data.z,
-		// 	};
+		this._accelerometerObserver = accelerometer.subscribe(data => {
+			// create new accelerometer object
+			const accelerometerObject = {
+				x: data.x,
+				y: data.y,
+				z: data.z,
+			};
 
-		// 	this._addAccelerometer(accelerometerObject);
-		// });
+			this._addAccelerometer(accelerometerObject);
+		});
 
 		BackgroundGeolocation.start();
 	};
