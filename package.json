@@ -15,7 +15,7 @@
     "appcenter-analytics": "^2.3.0",
     "appcenter-crashes": "^2.3.0",
     "react": "16.8.6",
-    "react-native": "0.60.5",
+    "react-native": "0.62.3",
     "react-native-device-info": "^2.3.2",
     "react-native-firebase": "^5.5.6",
     "react-native-flip-toggle-button": "^1.0.5",
